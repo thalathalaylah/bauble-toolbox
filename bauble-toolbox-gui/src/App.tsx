@@ -19,7 +19,7 @@ function App() {
           <h1 className="text-3xl font-bold underline">
               Hello world!
           </h1>
-
+          <button className="btn btn-primary w-64 rounded-full">Button</button>
           <div className="row">
               <a href="https://vitejs.dev" target="_blank">
                   <img src="/vite.svg" className="logo vite" alt="Vite logo"/>
