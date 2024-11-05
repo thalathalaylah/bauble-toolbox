@@ -10,48 +10,33 @@ use tauri::{LogicalPosition, LogicalSize, WebviewUrl};
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let width = 800.;
-            let height = 600.;
+            let width = 1920.;
+            let height = 1080.;
+
+            let left_window = width / 4.;
 
             let window = tauri::window::WindowBuilder::new(app, "main")
                 .inner_size(width, height)
                 .build()?;
 
             let _webview1 = window.add_child(
-                tauri::webview::WebviewBuilder::new("main1", WebviewUrl::App(Default::default()))
+                tauri::webview::WebviewBuilder::new(
+                    "main1",
+                    WebviewUrl::External("https://github.com/tauri-apps/tauri".parse().unwrap()),
+                )
                     .auto_resize(),
                 LogicalPosition::new(0., 0.),
-                LogicalSize::new(width/2., height/2.),
+                LogicalSize::new(left_window, height),
             )?;
 
             let _webview2 = window.add_child(
                 tauri::webview::WebviewBuilder::new(
                     "main2",
-                    WebviewUrl::External("https://github.com/tauri-apps/tauri".parse().unwrap()),
+                    WebviewUrl::App(Default::default()),
                 )
                     .auto_resize(),
-                LogicalPosition::new(width / 2., 0.),
-                LogicalSize::new(width / 2., height / 2.),
-            )?;
-
-            let _webview3 = window.add_child(
-                tauri::webview::WebviewBuilder::new(
-                    "main3",
-                    WebviewUrl::External("https://tauri.app".parse().unwrap()),
-                )
-                    .auto_resize(),
-                LogicalPosition::new(0., height / 2.),
-                LogicalSize::new(width / 2., height / 2.),
-            )?;
-
-            let _webview4 = window.add_child(
-                tauri::webview::WebviewBuilder::new(
-                    "main4",
-                    WebviewUrl::External("https://twitter.com/TauriApps".parse().unwrap()),
-                )
-                    .auto_resize(),
-                LogicalPosition::new(width / 2., height / 2.),
-                LogicalSize::new(width / 2., height / 2.),
+                LogicalPosition::new(left_window, 0.),
+                LogicalSize::new(width - left_window, height),
             )?;
 
             Ok(())
