@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "bauble-toolbox-gui/src-tauri",
+    "bauble-toolbox-logic"
+]
