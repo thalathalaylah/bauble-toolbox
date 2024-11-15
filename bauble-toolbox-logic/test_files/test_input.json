@@ -1,0 +1,15 @@
+{
+  "window": {
+    "width": 800,
+    "height": 600,
+    "side_url": "http://example.com"
+  },
+  "tasks": [
+    {
+      "name": "Task1"
+    },
+    {
+      "name": "Task2"
+    }
+  ]
+}
