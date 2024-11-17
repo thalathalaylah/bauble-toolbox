@@ -1,0 +1,15 @@
+{
+  "window": {
+    "width": 1920,
+    "height": 1080,
+    "side_url": "https://github.com/tauri-apps/tauri"
+  },
+  "tasks": [
+    {
+      "name": "Task1"
+    },
+    {
+      "name": "Task2"
+    }
+  ]
+}
