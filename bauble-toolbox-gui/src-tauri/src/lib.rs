@@ -24,15 +24,29 @@ pub fn run() {
                         .inner_size(width, height)
                         .build()?;
 
-                    let _webview1 = window.add_child(
-                        tauri::webview::WebviewBuilder::new(
-                            "main1",
-                            WebviewUrl::External(_config.window.side_url.parse().unwrap()),
-                        )
-                            .auto_resize(),
-                        LogicalPosition::new(0., 0.),
-                        LogicalSize::new(left_window, height),
-                    )?;
+                    // `side_url` が空文字列でない場合のみ `main1` ウェブビューを生成
+                    if !_config.window.side_url.is_empty() {
+                        let _webview1 = window.add_child(
+                            tauri::webview::WebviewBuilder::new(
+                                "main1",
+                                WebviewUrl::External(_config.window.side_url.parse().unwrap()),
+                            )
+                                .auto_resize(),
+                            LogicalPosition::new(0., 0.),
+                            LogicalSize::new(left_window, height),
+                        )?;
+                    }
+
+                    let main2_width = if !_config.window.side_url.is_empty() {
+                        width - left_window
+                    } else {
+                        width
+                    };
+                    let main2_left_window = if !_config.window.side_url.is_empty() {
+                        left_window
+                    } else {
+                        0.
+                    };
 
                     let _webview2 = window.add_child(
                         tauri::webview::WebviewBuilder::new(
@@ -40,8 +54,8 @@ pub fn run() {
                             WebviewUrl::App(Default::default()),
                         )
                             .auto_resize(),
-                        LogicalPosition::new(left_window, 0.),
-                        LogicalSize::new(width - left_window, height),
+                        LogicalPosition::new(main2_left_window, 0.),
+                        LogicalSize::new(main2_width, height),
                     )?;
 
                     Ok(())
