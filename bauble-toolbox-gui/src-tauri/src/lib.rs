@@ -4,6 +4,11 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+fn get_strings() -> Vec<String> {
+    vec!["string1".into(), "string2".into(), "string3".into()]
+}
+
 use tauri::{LogicalPosition, LogicalSize, WebviewUrl};
 use bauble_toolbox_logic::read_config;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -60,6 +65,7 @@ pub fn run() {
 
                     Ok(())
                 })
+                .invoke_handler(tauri::generate_handler![get_strings])
                 .run(tauri::generate_context!("./tauri.conf.json"))
                 .expect("error while running tauri application");
         }

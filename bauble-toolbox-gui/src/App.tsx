@@ -13,6 +13,16 @@ function App() {
     setGreetMsg(await invoke("greet", { name }));
   }
 
+  async function fetchStrings() {
+      try {
+          const strings: string[] = await invoke('get_strings')
+          console.log(strings)
+      } catch (e) {
+          console.error(e)
+      }
+  }
+  fetchStrings()
+
   return (
       <div className="container">
           <h1>Welcome to Tauri!</h1>
