@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
@@ -7,6 +7,7 @@ import "./index.css"
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
+  const [strings, setStrings] = useState<string[]>([]);
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -16,11 +17,15 @@ function App() {
   async function fetchStrings() {
       try {
           const strings: string[] = await invoke('get_strings')
-          console.log(strings)
+          setStrings(strings);
       } catch (e) {
           console.error(e)
       }
   }
+
+  useEffect(() => {
+      fetchStrings()
+  }, [])
   fetchStrings()
 
   return (
@@ -60,6 +65,14 @@ function App() {
           </form>
 
           <p>{greetMsg}</p>
+          <div>
+              <h2>Fetched Strings:</h2>
+              <ul>
+                  {strings.map((str, index) => (
+                      <li key={index}>{str}</li>
+                  ))}
+              </ul>
+          </div>
       </div>
   );
 }
