@@ -1,3 +1,10 @@
+use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
+use bauble_toolbox_logic::read_config;
+
+struct AppState {
+    strings: Vec<String>
+}
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -5,12 +12,9 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn get_strings() -> Vec<String> {
-    vec!["string1".into(), "string2".into(), "string3".into()]
+fn get_strings(state: State<AppState>) -> Vec<String> {
+    state.strings.clone()
 }
-
-use tauri::{LogicalPosition, LogicalSize, WebviewUrl};
-use bauble_toolbox_logic::read_config;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 
 pub fn run() {
@@ -18,7 +22,11 @@ pub fn run() {
     match read_config("./config.json") {
         Ok(_config) => {
             // Configが読み込めた場合はアプリケーションをそのまま実行
+            let strings = _config.tasks.iter().map(|t| t.name.clone()).collect();
+            let app_state = AppState { strings };
+
             tauri::Builder::default()
+                .manage(app_state)
                 .setup(move |app| {
                     let width = _config.window.width as f64;
                     let height = _config.window.height as f64;
