@@ -1,8 +1,8 @@
 use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
-use bauble_toolbox_logic::read_config;
+use bauble_toolbox_logic::{read_config, Task};
 
 struct AppState {
-    strings: Vec<String>
+    tasks: Vec<Task>
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -12,8 +12,8 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn get_strings(state: State<AppState>) -> Vec<String> {
-    state.strings.clone()
+fn get_tasks(state: State<AppState>) -> Vec<Task> {
+    state.tasks.clone()
 }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 
@@ -22,8 +22,8 @@ pub fn run() {
     match read_config("./config.json") {
         Ok(_config) => {
             // Configが読み込めた場合はアプリケーションをそのまま実行
-            let strings = _config.tasks.iter().map(|t| t.name.clone()).collect();
-            let app_state = AppState { strings };
+            let tasks = _config.tasks.clone();
+            let app_state = AppState { tasks };
 
             tauri::Builder::default()
                 .manage(app_state)
@@ -73,7 +73,7 @@ pub fn run() {
 
                     Ok(())
                 })
-                .invoke_handler(tauri::generate_handler![get_strings])
+                .invoke_handler(tauri::generate_handler![get_tasks])
                 .run(tauri::generate_context!("./tauri.conf.json"))
                 .expect("error while running tauri application");
         }

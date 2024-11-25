@@ -5,9 +5,11 @@ import "./App.css";
 import "./index.css"
 
 function App() {
+    type Task = { name: string };
+
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
-    const [strings, setStrings] = useState<string[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
 
     async function greet() {
@@ -15,18 +17,18 @@ function App() {
         setGreetMsg(await invoke("greet", { name }));
     }
 
-    async function fetchStrings() {
+    async function fetchTasks() {
         try {
-            const fetchedStrings: string[] = await invoke('get_strings')
-            setStrings(fetchedStrings);
-            setCheckedItems(new Array(fetchedStrings.length).fill(false));
+            const fetchedTasks: Task[] = await invoke('get_tasks', { name });
+            setTasks(fetchedTasks);
+            setCheckedItems(new Array(fetchedTasks.length).fill(false));
         } catch (e) {
             console.error(e)
         }
     }
 
     useEffect(() => {
-        fetchStrings()
+        fetchTasks()
     }, [])
 
     const handleCheckboxChange = (index: number) => {
@@ -75,9 +77,9 @@ function App() {
 
             <p>{greetMsg}</p>
             <div>
-                <h2 className="text-2xl font-semibold mb-4">Fetched Strings:</h2>
+                <h2 className="text-2xl font-semibold mb-4">Fetched Tasks:</h2>
                 <ul className="list-disc pl-5 space-y-2">
-                    {strings.map((str, index) => (
+                    {tasks.map((task, index) => (
                         <li key={index} className={`p-2 bg-gray-100 rounded-md shadow-md flex items-center ${checkedItems[index] ? 'line-through' : ''}`}>
                             <input
                                 type="checkbox"
@@ -85,7 +87,7 @@ function App() {
                                 checked={checkedItems[index]}
                                 onChange={() => handleCheckboxChange(index)}
                             />
-                            {str}
+                            {task.name}
                         </li>
                     ))}
                 </ul>

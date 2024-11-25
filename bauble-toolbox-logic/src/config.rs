@@ -1,7 +1,7 @@
 use std::fs;
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct Task {
     pub name: String
 }
