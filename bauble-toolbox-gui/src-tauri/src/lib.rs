@@ -1,8 +1,8 @@
-use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
 use bauble_toolbox_logic::{read_config, Task};
+use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
 
 struct AppState {
-    tasks: Vec<Task>
+    tasks: Vec<Task>,
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -26,6 +26,7 @@ pub fn run() {
             let app_state = AppState { tasks };
 
             tauri::Builder::default()
+                .plugin(tauri_plugin_shell::init())
                 .manage(app_state)
                 .setup(move |app| {
                     let width = _config.window.width as f64;
@@ -44,7 +45,7 @@ pub fn run() {
                                 "main1",
                                 WebviewUrl::External(_config.window.side_url.parse().unwrap()),
                             )
-                                .auto_resize(),
+                            .auto_resize(),
                             LogicalPosition::new(0., 0.),
                             LogicalSize::new(left_window, height),
                         )?;
@@ -66,7 +67,7 @@ pub fn run() {
                             "main2",
                             WebviewUrl::App(Default::default()),
                         )
-                            .auto_resize(),
+                        .auto_resize(),
                         LogicalPosition::new(main2_left_window, 0.),
                         LogicalSize::new(main2_width, height),
                     )?;
