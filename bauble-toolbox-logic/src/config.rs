@@ -3,7 +3,8 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct Task {
-    pub name: String
+    pub name: String,
+    pub link: Option<String>
 }
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct WindowSetting {

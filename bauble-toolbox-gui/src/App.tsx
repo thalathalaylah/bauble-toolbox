@@ -6,7 +6,7 @@ import "./index.css"
 import { open } from '@tauri-apps/plugin-shell'
 
 function App() {
-    type Task = { name: string };
+    type Task = { name: string, link: string | undefined };
 
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
@@ -99,12 +99,21 @@ function App() {
                                 checked={checkedItems[index]}
                                 onChange={() => handleCheckboxChange(index)}
                             />
-                            {task.name}
+                            {task.link ? (
+                                <a
+                                    href={task.link}
+                                    onClick={handleExternalLink}
+                                    className="text-blue-500 underline"
+                                >
+                                    {task.name}
+                                </a>
+                            ) : (
+                                task.name
+                            )}
                         </li>
                     ))}
                 </ul>
-            </div>
-        </div>
+            </div>        </div>
     );
 }
 
