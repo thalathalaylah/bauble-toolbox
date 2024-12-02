@@ -6,6 +6,11 @@ pub struct Task {
     pub name: String,
     pub link: Option<String>
 }
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub struct Link {
+    pub name: String,
+    pub link: String
+}
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct WindowSetting {
     pub width: i32,
@@ -16,7 +21,8 @@ pub struct WindowSetting {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Config {
     pub window: WindowSetting,
-    pub tasks: Vec<Task>
+    pub tasks: Vec<Task>,
+    pub links: Vec<Link>
 }
 
 use thiserror::Error;

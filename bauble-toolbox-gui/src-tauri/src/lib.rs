@@ -1,8 +1,9 @@
-use bauble_toolbox_logic::{read_config, Task};
+use bauble_toolbox_logic::{read_config, Link, Task};
 use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
 
 struct AppState {
     tasks: Vec<Task>,
+    links: Vec<Link>
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -15,6 +16,11 @@ fn greet(name: &str) -> String {
 fn get_tasks(state: State<AppState>) -> Vec<Task> {
     state.tasks.clone()
 }
+
+#[tauri::command]
+fn get_links(state: State<AppState>) -> Vec<Link> {
+    state.links.clone()
+}
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 
 pub fn run() {
@@ -23,7 +29,8 @@ pub fn run() {
         Ok(_config) => {
             // Configが読み込めた場合はアプリケーションをそのまま実行
             let tasks = _config.tasks.clone();
-            let app_state = AppState { tasks };
+            let links = _config.links.clone();
+            let app_state = AppState { tasks, links };
 
             tauri::Builder::default()
                 .plugin(tauri_plugin_shell::init())
@@ -74,7 +81,7 @@ pub fn run() {
 
                     Ok(())
                 })
-                .invoke_handler(tauri::generate_handler![get_tasks])
+                .invoke_handler(tauri::generate_handler![get_tasks, get_links])
                 .run(tauri::generate_context!("./tauri.conf.json"))
                 .expect("error while running tauri application");
         }

@@ -1,4 +1,4 @@
-use bauble_toolbox_logic::{read_config, Config, ConfigError, WindowSetting, Task}; //  your crate name
+use bauble_toolbox_logic::{read_config, Config, ConfigError, WindowSetting, Task, Link}; //  your crate name
 
 #[test]
 fn read_config_test() {
@@ -10,10 +10,18 @@ fn read_config_test() {
         },
         tasks: vec![
             Task {
-                name: "Task1".to_string()
+                name: "Task1".to_string(),
+                link: Some("Link1".to_string())
             },
             Task {
-                name: "Task2".to_string()
+                name: "Task2".to_string(),
+                link: None
+            }
+        ],
+        links: vec![
+            Link {
+                name: "Link1".to_string(),
+                link: "example".to_string()
             }
         ]
     };

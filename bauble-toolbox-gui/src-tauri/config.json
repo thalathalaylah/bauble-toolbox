@@ -12,5 +12,11 @@
     {
       "name": "Task2"
     }
+  ],
+  "links": [
+    {
+      "name": "Link1",
+      "link": "https://example.com"
+    }
   ]
 }

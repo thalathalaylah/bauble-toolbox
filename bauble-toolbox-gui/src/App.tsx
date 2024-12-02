@@ -7,10 +7,12 @@ import { open } from '@tauri-apps/plugin-shell'
 
 function App() {
     type Task = { name: string, link: string | undefined };
+    type Link = { name: string, link: string };
 
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [links, setLinks] = useState<Link[]>([]);
     const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
 
     async function greet() {
@@ -28,8 +30,18 @@ function App() {
         }
     }
 
+    async function fetchLinks() {
+        try {
+            const fetchedLinks: Link[] = await invoke('get_links');
+            setLinks(fetchedLinks);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     useEffect(() => {
         fetchTasks()
+        fetchLinks()
     }, [])
 
     const handleCheckboxChange = (index: number) => {
@@ -113,7 +125,24 @@ function App() {
                         </li>
                     ))}
                 </ul>
-            </div>        </div>
+            </div>
+            <div>
+                <h2 className="text-2xl font-semibold mb-4">Links:</h2>
+                <ul className="list-disc pl-5 space-y-2">
+                    {links.map((link, index) => (
+                        <li key={index}>
+                            <a
+                                href={link.link}
+                                onClick={handleExternalLink}
+                                className="text-blue-500 underline"
+                            >
+                                {link.name}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
     );
 }
 
