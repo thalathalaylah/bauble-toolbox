@@ -6,9 +6,17 @@ interface TaskListProps {
     tasks: Task[];
     checkedItems: boolean[];
     onCheckboxChange: (index: number) => void;
+    isLoading?: boolean;
+    error?: string | null;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, checkedItems, onCheckboxChange }) => {
+const TaskList: React.FC<TaskListProps> = ({ 
+    tasks, 
+    checkedItems, 
+    onCheckboxChange,
+    isLoading = false,
+    error = null
+}) => {
     const handleExternalLink = async (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         const link = e.currentTarget;
@@ -16,6 +24,14 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, checkedItems, onCheckboxChan
             await open(link.href);
         }
     };
+
+    if (isLoading) {
+        return <div>Loading tasks...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-500">Error: {error}</div>;
+    }
 
     return (
         <div>

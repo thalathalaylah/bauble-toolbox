@@ -4,9 +4,15 @@ import { open } from '@tauri-apps/plugin-shell';
 
 interface LinkListProps {
     links: Link[];
+    isLoading?: boolean;
+    error?: string | null;
 }
 
-const LinkList: React.FC<LinkListProps> = ({ links }) => {
+const LinkList: React.FC<LinkListProps> = ({ 
+    links,
+    isLoading = false,
+    error = null 
+}) => {
     const handleExternalLink = async (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
         const link = e.currentTarget;
@@ -14,6 +20,14 @@ const LinkList: React.FC<LinkListProps> = ({ links }) => {
             await open(link.href);
         }
     };
+
+    if (isLoading) {
+        return <div>Loading links...</div>;
+    }
+
+    if (error) {
+        return <div className="text-red-500">Error: {error}</div>;
+    }
 
     return (
         <div>

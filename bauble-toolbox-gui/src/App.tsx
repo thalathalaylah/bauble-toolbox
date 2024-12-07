@@ -4,52 +4,25 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import "./index.css"
 import { open } from '@tauri-apps/plugin-shell'
-import { Task, Link } from './types';
 import TaskList from './components/Tasks/TaskList';
 import LinkList from './components/Links/LinkList';
+import { useTasks } from './hooks/useTasks';
+import { useLinks } from './hooks/useLinks';
 
 function App() {
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [links, setLinks] = useState<Link[]>([]);
-    const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
+    const { tasks, checkedItems, isLoading: tasksLoading, error: tasksError, fetchTasks, handleCheckboxChange } = useTasks();
+    const { links, isLoading: linksLoading, error: linksError, fetchLinks } = useLinks();
 
     async function greet() {
         setGreetMsg(await invoke("greet", { name }));
     }
 
-    async function fetchTasks() {
-        try {
-            const fetchedTasks: Task[] = await invoke('get_tasks', { name });
-            setTasks(fetchedTasks);
-            setCheckedItems(new Array(fetchedTasks.length).fill(false));
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    async function fetchLinks() {
-        try {
-            const fetchedLinks: Link[] = await invoke('get_links');
-            setLinks(fetchedLinks);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     useEffect(() => {
         fetchTasks()
         fetchLinks()
-    }, [])
-
-    const handleCheckboxChange = (index: number) => {
-        setCheckedItems(prevCheckedItems => {
-            const newCheckedItems = [...prevCheckedItems];
-            newCheckedItems[index] = !newCheckedItems[index];
-            return newCheckedItems;
-        });
-    };
+    }, [fetchTasks, fetchLinks])
 
     const handleExternalLink = async (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
@@ -102,10 +75,16 @@ function App() {
             <TaskList 
                 tasks={tasks} 
                 checkedItems={checkedItems} 
-                onCheckboxChange={handleCheckboxChange} 
+                onCheckboxChange={handleCheckboxChange}
+                isLoading={tasksLoading}
+                error={tasksError}
             />
             
-            <LinkList links={links} />
+            <LinkList 
+                links={links}
+                isLoading={linksLoading}
+                error={linksError}
+            />
         </div>
     );
 }
