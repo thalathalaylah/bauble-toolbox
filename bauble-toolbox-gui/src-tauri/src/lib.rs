@@ -6,12 +6,6 @@ struct AppState {
     links: Vec<Link>
 }
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[tauri::command]
 fn get_tasks(state: State<AppState>) -> Vec<Task> {
     state.tasks.clone()
@@ -21,8 +15,8 @@ fn get_tasks(state: State<AppState>) -> Vec<Task> {
 fn get_links(state: State<AppState>) -> Vec<Link> {
     state.links.clone()
 }
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // TODO: release buildの場合は適切な場所からconfを読む必要がある
     match read_config("./config.json") {
