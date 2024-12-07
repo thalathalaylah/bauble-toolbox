@@ -1,14 +1,14 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import "./index.css"
 import { open } from '@tauri-apps/plugin-shell'
+import { Task, Link } from './types';
+import TaskList from './components/Tasks/TaskList';
+import LinkList from './components/Links/LinkList';
 
 function App() {
-    type Task = { name: string, link: string | undefined };
-    type Link = { name: string, link: string };
-
     const [greetMsg, setGreetMsg] = useState("");
     const [name, setName] = useState("");
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -16,7 +16,6 @@ function App() {
     const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
 
     async function greet() {
-        // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
         setGreetMsg(await invoke("greet", { name }));
     }
 
@@ -99,49 +98,14 @@ function App() {
             </form>
 
             <p>{greetMsg}</p>
-            <div>
-                <h2 className="text-2xl font-semibold mb-4">Fetched Tasks:</h2>
-                <ul className="list-disc pl-5 space-y-2">
-                    {tasks.map((task, index) => (
-                        <li key={index}
-                            className={`p-2 bg-gray-100 rounded-md shadow-md flex items-center ${checkedItems[index] ? 'line-through' : ''}`}>
-                            <input
-                                type="checkbox"
-                                className="mr-2"
-                                checked={checkedItems[index]}
-                                onChange={() => handleCheckboxChange(index)}
-                            />
-                            {task.link ? (
-                                <a
-                                    href={task.link}
-                                    onClick={handleExternalLink}
-                                    className="text-blue-500 underline"
-                                >
-                                    {task.name}
-                                </a>
-                            ) : (
-                                task.name
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h2 className="text-2xl font-semibold mb-4">Links:</h2>
-                <ul className="list-disc pl-5 space-y-2">
-                    {links.map((link, index) => (
-                        <li key={index}>
-                            <a
-                                href={link.link}
-                                onClick={handleExternalLink}
-                                className="text-blue-500 underline"
-                            >
-                                {link.name}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            
+            <TaskList 
+                tasks={tasks} 
+                checkedItems={checkedItems} 
+                onCheckboxChange={handleCheckboxChange} 
+            />
+            
+            <LinkList links={links} />
         </div>
     );
 }
