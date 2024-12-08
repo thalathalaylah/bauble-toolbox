@@ -1,5 +1,6 @@
 use bauble_toolbox_logic::{read_config, Link, Task};
-use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
+use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl, Manager};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
 struct AppState {
     tasks: Vec<Task>,
@@ -18,15 +19,17 @@ fn get_links(state: State<AppState>) -> Vec<Link> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // TODO: release buildの場合は適切な場所からconfを読む必要がある
+    // 最小限のTauriアプリを作成（エラーダイアログ用）
+    let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init());
+
     match read_config("./config.json") {
         Ok(_config) => {
-            // Configが読み込めた場合はアプリケーションをそのまま実行
             let tasks = _config.tasks.clone();
             let links = _config.links.clone();
             let app_state = AppState { tasks, links };
 
-            tauri::Builder::default()
+            builder
                 .plugin(tauri_plugin_shell::init())
                 .manage(app_state)
                 .setup(move |app| {
@@ -35,21 +38,57 @@ pub fn run() {
 
                     let left_window = width / 4.;
 
-                    let window = tauri::window::WindowBuilder::new(app, "main")
+                    let window = match tauri::window::WindowBuilder::new(app, "main")
                         .inner_size(width, height)
-                        .build()?;
+                        .build() {
+                            Ok(window) => window,
+                            Err(e) => {
+                                let app_handle = app.app_handle();
+                                app_handle.dialog()
+                                    .message(format!("ウィンドウの作成に失敗しました: {}", e))
+                                    .title("エラー")
+                                    .buttons(MessageDialogButtons::Ok)
+                                    .blocking_show();
+                                std::process::exit(1);
+                            }
+                        };
 
                     // `side_url` が空文字列でない場合のみ `main1` ウェブビューを生成
                     if !_config.window.side_url.is_empty() {
-                        let _webview1 = window.add_child(
+                        // side_urlのパース
+                        let side_url = match _config.window.side_url.parse() {
+                            Ok(url) => url,
+                            Err(e) => {
+                                let app_handle = app.app_handle();
+                                app_handle.dialog()
+                                    .message(format!("サイドURLの解析に失敗しました: {}", e))
+                                    .title("エラー")
+                                    .buttons(MessageDialogButtons::Ok)
+                                    .blocking_show();
+                                std::process::exit(1);
+                            }
+                        };
+
+                        let _webview1 = match window.add_child(
                             tauri::webview::WebviewBuilder::new(
                                 "main1",
-                                WebviewUrl::External(_config.window.side_url.parse().unwrap()),
+                                WebviewUrl::External(side_url),
                             )
                             .auto_resize(),
                             LogicalPosition::new(0., 0.),
                             LogicalSize::new(left_window, height),
-                        )?;
+                        ) {
+                            Ok(webview) => webview,
+                            Err(e) => {
+                                let app_handle = app.app_handle();
+                                app_handle.dialog()
+                                    .message(format!("サイドビューの作成に失敗しました: {}", e))
+                                    .title("エラー")
+                                    .buttons(MessageDialogButtons::Ok)
+                                    .blocking_show();
+                                std::process::exit(1);
+                            }
+                        };
                     }
 
                     let main2_width = if !_config.window.side_url.is_empty() {
@@ -63,7 +102,7 @@ pub fn run() {
                         0.
                     };
 
-                    let _webview2 = window.add_child(
+                    let _webview2 = match window.add_child(
                         tauri::webview::WebviewBuilder::new(
                             "main2",
                             WebviewUrl::App(Default::default()),
@@ -71,7 +110,18 @@ pub fn run() {
                         .auto_resize(),
                         LogicalPosition::new(main2_left_window, 0.),
                         LogicalSize::new(main2_width, height),
-                    )?;
+                    ) {
+                        Ok(webview) => webview,
+                        Err(e) => {
+                            let app_handle = app.app_handle();
+                            app_handle.dialog()
+                                .message(format!("メインビューの作成に失敗しました: {}", e))
+                                .title("エラー")
+                                .buttons(MessageDialogButtons::Ok)
+                                .blocking_show();
+                            std::process::exit(1);
+                        }
+                    };
 
                     Ok(())
                 })
@@ -80,8 +130,19 @@ pub fn run() {
                 .expect("error while running tauri application");
         }
         Err(e) => {
-            // Configが読み込めなかった場合はエラーメッセージを表示して終了
-            eprintln!("Failed to read config: {}", e);
+            // 設定ファイルの読み込みに失敗した場合は、最小限のアプリを実行してダイアログを表示
+            builder
+                .setup(move |app| {
+                    let app_handle = app.app_handle();
+                    app_handle.dialog()
+                        .message(format!("設定ファイルの読み込みに失敗しました: {}", e))
+                        .title("エラー")
+                        .buttons(MessageDialogButtons::Ok)
+                        .blocking_show();
+                    std::process::exit(1);
+                })
+                .run(tauri::generate_context!("./tauri.conf.json"))
+                .expect("error while showing error dialog");
         }
     }
 }
