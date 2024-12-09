@@ -1,6 +1,8 @@
 use bauble_toolbox_logic::{read_config, Link, Task};
-use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl, Manager};
+use tauri::{LogicalPosition, LogicalSize, State, WebviewUrl};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
+use tauri_plugin_shell::ShellExt;
+use url::Url;
 
 struct AppState {
     tasks: Vec<Task>,
@@ -36,6 +38,7 @@ pub fn run() {
                 .plugin(tauri_plugin_shell::init())
                 .manage(app_state)
                 .setup(move |app| {
+                    let app_handle = app.handle();
                     let width = _config.window.width as f64;
                     let height = _config.window.height as f64;
 
@@ -46,7 +49,6 @@ pub fn run() {
                         .build() {
                             Ok(window) => window,
                             Err(e) => {
-                                let app_handle = app.app_handle();
                                 app_handle.dialog()
                                     .message(format!("ウィンドウの作成に失敗しました: {}", e))
                                     .title("エラー")
@@ -59,10 +61,9 @@ pub fn run() {
                     // `side_url` が空文字列でない場合のみ `main1` ウェブビューを生成
                     if !_config.window.side_url.is_empty() {
                         // side_urlのパース
-                        let side_url = match _config.window.side_url.parse() {
+                        let side_url: Url = match Url::parse(&_config.window.side_url) {
                             Ok(url) => url,
                             Err(e) => {
-                                let app_handle = app.app_handle();
                                 app_handle.dialog()
                                     .message(format!("サイドURLの解析に失敗しました: {}", e))
                                     .title("エラー")
@@ -72,18 +73,32 @@ pub fn run() {
                             }
                         };
 
+                        let side_url_clone = side_url.clone();
+                        let handle_clone = app_handle.clone();
                         let _webview1 = match window.add_child(
                             tauri::webview::WebviewBuilder::new(
                                 "main1",
                                 WebviewUrl::External(side_url),
                             )
-                            .auto_resize(),
+                            .auto_resize()
+                            // リンクのクリックイベントハンドラを追加
+                            .on_navigation(move |url| {
+                                // 最初のロード（side_url）は許可
+                                if url == &side_url_clone {
+                                    return true;
+                                }
+                                // それ以外のURLはデフォルトブラウザで開く
+                                if let Err(e) = handle_clone.shell().open(url.to_string(), None) {
+                                    eprintln!("Failed to open URL: {}", e);
+                                }
+                                // WebViewでの遷移はキャンセル
+                                false
+                            }),
                             LogicalPosition::new(0., 0.),
                             LogicalSize::new(left_window, height),
                         ) {
                             Ok(webview) => webview,
                             Err(e) => {
-                                let app_handle = app.app_handle();
                                 app_handle.dialog()
                                     .message(format!("サイドビューの作成に失敗しました: {}", e))
                                     .title("エラー")
@@ -116,7 +131,6 @@ pub fn run() {
                     ) {
                         Ok(webview) => webview,
                         Err(e) => {
-                            let app_handle = app.app_handle();
                             app_handle.dialog()
                                 .message(format!("メインビューの作成に失敗しました: {}", e))
                                 .title("エラー")
@@ -136,7 +150,7 @@ pub fn run() {
             // 設定ファイルの読み込みに失敗した場合は、最小限のアプリを実行してダイアログを表示
             builder
                 .setup(move |app| {
-                    let app_handle = app.app_handle();
+                    let app_handle = app.handle();
                     app_handle.dialog()
                         .message(format!("設定ファイルの読み込みに失敗しました: {}", e))
                         .title("エラー")
