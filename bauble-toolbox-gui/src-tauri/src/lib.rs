@@ -19,6 +19,9 @@ fn get_links(state: State<AppState>) -> Vec<Link> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // context を1回だけ生成
+    let context = tauri::generate_context!("./tauri.conf.json");
+    
     // 最小限のTauriアプリを作成（エラーダイアログ用）
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init());
@@ -126,7 +129,7 @@ pub fn run() {
                     Ok(())
                 })
                 .invoke_handler(tauri::generate_handler![get_tasks, get_links])
-                .run(tauri::generate_context!("./tauri.conf.json"))
+                .run(context)
                 .expect("error while running tauri application");
         }
         Err(e) => {
@@ -141,7 +144,7 @@ pub fn run() {
                         .blocking_show();
                     std::process::exit(1);
                 })
-                .run(tauri::generate_context!("./tauri.conf.json"))
+                .run(context)
                 .expect("error while showing error dialog");
         }
     }
