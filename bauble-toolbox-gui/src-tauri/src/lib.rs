@@ -152,8 +152,19 @@ pub fn run() {
             builder
                 .setup(move |app| {
                     let app_handle = app.handle();
+                    // カレントディレクトリを取得して絶対パスを構築
+                    let absolute_path = std::env::current_dir()
+                        .map(|path| path.join("config.json"))
+                        .unwrap_or_else(|_| std::path::PathBuf::from("./config.json"));
+
                     app_handle.dialog()
-                        .message(format!("設定ファイルの読み込みに失敗しました: {}", e))
+                        .message(format!(
+                            "設定ファイルの読み込みに失敗しました:\n\
+                             ファイルパス: {}\n\
+                             エラー: {}", 
+                            absolute_path.display(),
+                            e
+                        ))
                         .title("エラー")
                         .buttons(MessageDialogButtons::Ok)
                         .blocking_show();
