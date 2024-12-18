@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/meetopen.json",
+  "identifier": "meetopen",
+  "windows": ["main"],
+  "remote": {
+    "urls": ["https://calendar.google.com"]
+  },
+  "platforms": ["macOS", "windows"],
+  "permissions": ["shell:allow-open"]
+}

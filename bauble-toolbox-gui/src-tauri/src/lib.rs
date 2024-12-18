@@ -83,16 +83,17 @@ pub fn run() {
                             .auto_resize()
                             // リンクのクリックイベントハンドラを追加
                             .on_navigation(move |url| {
-                                // 最初のロード（side_url）は許可
-                                if url == &side_url_clone {
-                                    return true;
+                                // meet.google.comの場合はデフォルトブラウザで開く
+                                if let fqdn = url.host() {
+                                    println!("fqdn: {}", fqdn.clone().unwrap().to_string());
+                                    if fqdn.unwrap().to_string() == "meet.google.com" {
+                                        if let Err(e) = handle_clone.shell().open(url.to_string(), None) {
+                                            eprintln!("Failed to open URL: {}", e);
+                                        }
+                                        return false
+                                    }
                                 }
-                                // それ以外のURLはデフォルトブラウザで開く
-                                if let Err(e) = handle_clone.shell().open(url.to_string(), None) {
-                                    eprintln!("Failed to open URL: {}", e);
-                                }
-                                // WebViewでの遷移はキャンセル
-                                false
+                                true
                             }),
                             LogicalPosition::new(0., 0.),
                             LogicalSize::new(left_window, height),
