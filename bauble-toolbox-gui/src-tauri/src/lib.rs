@@ -110,15 +110,81 @@ pub fn run() {
                         };
                     }
 
+                    // 中央上部のウィンドウを作成
+                    let middle_top_url = match Url::parse(&_config.window.middle_top_url) {
+                        Ok(url) => url,
+                        Err(e) => {
+                            app_handle.dialog()
+                                .message(format!("middle_top_urlの解析に失敗しました: {}", e))
+                                .title("エラー")
+                                .buttons(MessageDialogButtons::Ok)
+                                .blocking_show();
+                            std::process::exit(1);
+                        }
+                    };
+
+                    let _webview_middle_top = match window.add_child(
+                        tauri::webview::WebviewBuilder::new(
+                            "middle_top",
+                            WebviewUrl::External(middle_top_url),
+                        )
+                        .auto_resize(),
+                        LogicalPosition::new(left_window, 0.),
+                        LogicalSize::new(left_window, height / 2.),
+                    ) {
+                        Ok(webview) => webview,
+                        Err(e) => {
+                            app_handle.dialog()
+                                .message(format!("中央上部ビューの作成に失敗しました: {}", e))
+                                .title("エラー")
+                                .buttons(MessageDialogButtons::Ok)
+                                .blocking_show();
+                            std::process::exit(1);
+                        }
+                    };
+
+                    // 中央下部のウィンドウを作成
+                    let middle_bottom_url = match Url::parse(&_config.window.middle_bottom_url) {
+                        Ok(url) => url,
+                        Err(e) => {
+                            app_handle.dialog()
+                                .message(format!("middle_bottom_urlの解析に失敗しました: {}", e))
+                                .title("エラー")
+                                .buttons(MessageDialogButtons::Ok)
+                                .blocking_show();
+                            std::process::exit(1);
+                        }
+                    };
+
+                    let _webview_middle_bottom = match window.add_child(
+                        tauri::webview::WebviewBuilder::new(
+                            "middle_bottom",
+                            WebviewUrl::External(middle_bottom_url),
+                        )
+                        .auto_resize(),
+                        LogicalPosition::new(left_window, height / 2.),
+                        LogicalSize::new(left_window, height / 2.),
+                    ) {
+                        Ok(webview) => webview,
+                        Err(e) => {
+                            app_handle.dialog()
+                                .message(format!("中央下部ビューの作成に失敗しました: {}", e))
+                                .title("エラー")
+                                .buttons(MessageDialogButtons::Ok)
+                                .blocking_show();
+                            std::process::exit(1);
+                        }
+                    };
+
                     let main2_width = if !_config.window.side_url.is_empty() {
-                        width - left_window
+                        width - (left_window * 2.)  // 左側のウィンドウとmiddle部分を引く
                     } else {
-                        width
+                        width - left_window  // サイドビューがない場合はmiddle部分だけ引く
                     };
                     let main2_left_window = if !_config.window.side_url.is_empty() {
-                        left_window
+                        left_window * 2.  // 左側のウィンドウとmiddle部分の幅を足す
                     } else {
-                        0.
+                        left_window  // サイドビューがない場合はmiddle部分の幅だけ
                     };
 
                     let _webview2 = match window.add_child(

@@ -15,7 +15,9 @@ pub struct Link {
 pub struct WindowSetting {
     pub width: i32,
     pub height: i32,
-    pub side_url: String
+    pub side_url: String,
+    pub middle_top_url: String,
+    pub middle_bottom_url: String
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
